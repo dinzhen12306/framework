@@ -55,10 +55,10 @@ func (r Redis) Init() error {
 }
 
 type Nacos struct {
-	ipAddr string //主机
-	port   uint64 //端口号
-	dataId string //nacos数据库名称
-	group  string //nacos分组名称
+	IpAddr string //主机
+	Port   uint64 //端口号
+	DataId string //nacos数据库名称
+	Group  string //nacos分组名称
 }
 
 // 初始化服务
@@ -75,8 +75,8 @@ func Initialisation(nacos *Nacos) Config {
 	// 至少一个ServerConfig
 	serverConfigs := []constant.ServerConfig{
 		{
-			IpAddr: nacos.ipAddr,
-			Port:   nacos.port,
+			IpAddr: nacos.IpAddr,
+			Port:   nacos.Port,
 		},
 	}
 	// 创建动态配置客户端的另一种方式 (推荐)
@@ -90,8 +90,8 @@ func Initialisation(nacos *Nacos) Config {
 		panic(err)
 	}
 	config, err := configClient.GetConfig(vo.ConfigParam{
-		DataId: nacos.dataId,
-		Group:  nacos.group,
+		DataId: nacos.DataId,
+		Group:  nacos.Group,
 	})
 	if err != nil {
 		panic(err)
@@ -103,8 +103,8 @@ func Initialisation(nacos *Nacos) Config {
 	}
 	log.Println(Configs)
 	err = configClient.ListenConfig(vo.ConfigParam{
-		DataId: nacos.dataId,
-		Group:  nacos.group,
+		DataId: nacos.DataId,
+		Group:  nacos.Group,
 		OnChange: func(namespace, group, dataId, data string) {
 			fmt.Println("配置文件发生更改")
 			fmt.Println("group:" + group + ", dataId:" + dataId + ", data:" + data)
