@@ -54,8 +54,15 @@ func (r Redis) Init() error {
 	return nil
 }
 
+type Nacos struct {
+	ipAddr string //主机
+	port   uint64 //端口号
+	dataId string //nacos数据库名称
+	group  string //nacos分组名称
+}
+
 // 初始化服务
-func Initialisation(ipAddr string, port uint64, dataId, group string) Config {
+func Initialisation(nacos *Nacos) Config {
 	// 创建clientConfig
 	clientConfig := constant.ClientConfig{
 		NamespaceId:         "", // 如果需要支持多namespace，我们可以场景多个client,它们有不同的NamespaceId。当namespace是public时，此处填空字符串。
@@ -68,8 +75,8 @@ func Initialisation(ipAddr string, port uint64, dataId, group string) Config {
 	// 至少一个ServerConfig
 	serverConfigs := []constant.ServerConfig{
 		{
-			IpAddr: ipAddr,
-			Port:   port,
+			IpAddr: nacos.ipAddr,
+			Port:   nacos.port,
 		},
 	}
 	// 创建动态配置客户端的另一种方式 (推荐)
@@ -83,8 +90,8 @@ func Initialisation(ipAddr string, port uint64, dataId, group string) Config {
 		panic(err)
 	}
 	config, err := configClient.GetConfig(vo.ConfigParam{
-		DataId: dataId,
-		Group:  group,
+		DataId: nacos.dataId,
+		Group:  nacos.group,
 	})
 	if err != nil {
 		panic(err)
@@ -96,8 +103,8 @@ func Initialisation(ipAddr string, port uint64, dataId, group string) Config {
 	}
 	log.Println(Configs)
 	err = configClient.ListenConfig(vo.ConfigParam{
-		DataId: dataId,
-		Group:  group,
+		DataId: nacos.dataId,
+		Group:  nacos.group,
 		OnChange: func(namespace, group, dataId, data string) {
 			fmt.Println("配置文件发生更改")
 			fmt.Println("group:" + group + ", dataId:" + dataId + ", data:" + data)
