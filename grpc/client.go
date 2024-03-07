@@ -1,7 +1,14 @@
 package grpc
 
-import "google.golang.org/grpc"
+import (
+	"github.com/dinzhen12306/framework/consul"
+	"google.golang.org/grpc"
+)
 
-func Client(port string, with grpc.DialOption) (*grpc.ClientConn, error) {
-	return grpc.Dial(port, with)
+func Client(name string, with grpc.DialOption) (*grpc.ClientConn, error) {
+	conn, err := consul.AgentHealthServiceByName(name)
+	if err != nil {
+		return nil, err
+	}
+	return grpc.Dial(conn, with)
 }
