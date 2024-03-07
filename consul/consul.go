@@ -10,7 +10,7 @@ import (
 )
 
 func ServiceRegister(serverName, address string, port int) error {
-	client, err := api.NewClient(&api.Config{Address: fmt.Sprintf("%s:%s", address, 8500)})
+	client, err := api.NewClient(&api.Config{Address: fmt.Sprintf("%s:%d", address, 8500)})
 	if err != nil {
 		return err
 	}
