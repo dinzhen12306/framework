@@ -46,9 +46,10 @@ func AgentHealthServiceByName(name string) (string, error) {
 func Dial(ServerHost, ServerPort, ServerName string) (*grpc.ClientConn, error) {
 	return grpc.Dial(
 		// consul服务
-		fmt.Sprintf("consul://%s:%s/%s?healthy=true", ServerHost, ServerPort, ServerName),
+		fmt.Sprintf("%s:%s", ServerHost, ServerPort),
 		// 指定round_robin策略
-		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingPolicy": "round_robin", "service": {"name": "%s"}}`, ServerName)),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 }
+
