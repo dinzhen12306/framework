@@ -20,6 +20,7 @@ type Nacos struct {
 }
 
 var (
+	NacosConfig  *Nacos
 	client       config_client.IConfigClient
 	namingClient naming_client.INamingClient
 	err          error
@@ -27,6 +28,7 @@ var (
 
 // 初始化服务
 func Initialisation(nacos *Nacos) error {
+	NacosConfig = nacos
 	// 创建clientConfig
 	clientConfig := constant.ClientConfig{
 		NamespaceId:         "", // 如果需要支持多namespace，我们可以场景多个client,它们有不同的NamespaceId。当namespace是public时，此处填空字符串。
@@ -81,10 +83,10 @@ func ListenServer(nacos *Nacos, fun ...func()) error {
 	return nil
 }
 
-func GetConfig(dataId, group string) (string, error) {
+func GetConfig() (string, error) {
 	return client.GetConfig(vo.ConfigParam{
-		DataId: dataId,
-		Group:  group,
+		DataId: NacosConfig.DataId,
+		Group:  NacosConfig.Group,
 	})
 }
 

@@ -3,7 +3,10 @@ package consul
 import (
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/hashicorp/consul/api"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func ServiceRegister(serverName, address string, port int) error {
@@ -12,7 +15,7 @@ func ServiceRegister(serverName, address string, port int) error {
 		return err
 	}
 	return client.Agent().ServiceRegister(&api.AgentServiceRegistration{
-		ID:      serverName,
+		ID:      uuid.NewString(),
 		Name:    serverName,
 		Tags:    []string{"GRPC"},
 		Port:    port,
@@ -38,4 +41,14 @@ func AgentHealthServiceByName(name string) (string, error) {
 		return "", errors.New("services without health")
 	}
 	return fmt.Sprintf("%s:%d", info[0].Service.Service, info[0].Service.Port), nil
+}
+
+func Dial(ServerHost, ServerPort, ServerName string) (*grpc.ClientConn, error) {
+	return grpc.Dial(
+		// consul服务
+		fmt.Sprintf("consul://%s:%s/%s?healthy=true", ServerHost, ServerPort, ServerName),
+		// 指定round_robin策略
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 }
