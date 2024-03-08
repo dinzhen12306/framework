@@ -3,14 +3,30 @@ package consul
 import (
 	"errors"
 	"fmt"
+	nacos "github.com/dinzhen12306/framework/config"
 	"github.com/google/uuid"
 	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"gopkg.in/yaml.v2"
 )
 
 func ServiceRegister(serverName, address string, port int) error {
-	client, err := api.NewClient(&api.Config{Address: fmt.Sprintf("%s:%s", address, port)})
+	config, err := nacos.GetConfig()
+	if err != nil {
+		return err
+	}
+	data := struct {
+		Consul struct {
+			Host string `yaml:"Host"`
+			Port int    `yaml:"Port"`
+		} `yaml:"Consul"`
+	}{}
+	err = yaml.Unmarshal([]byte(config), &data)
+	if err != nil {
+		return err
+	}
+	client, err := api.NewClient(&api.Config{Address: fmt.Sprintf("%s:%d", data.Consul.Host, data.Consul.Port)})
 	if err != nil {
 		return err
 	}
@@ -46,9 +62,9 @@ func AgentHealthServiceByName(name string) (string, error) {
 func Dial(ServerHost, ServerPort, ServerName string) (*grpc.ClientConn, error) {
 	return grpc.Dial(
 		// consul服务
-		fmt.Sprintf("consul://%s:%s/%s?healthy=true", ServerHost, ServerPort, ServerName),
+		fmt.Sprintf("%s:%s", ServerHost, ServerPort),
 		// 指定round_robin策略
-		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingPolicy": "round_robin", "service": {"name": "%s"}}`, ServerName)),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 }
