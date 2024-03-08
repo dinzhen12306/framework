@@ -72,7 +72,7 @@ func AgentHealthServiceByName(name string) (string, error) {
 	if sr != "passing" {
 		return "", errors.New("services without health")
 	}
-	return fmt.Sprintf("%s:%d", info[0].Service.Service, info[0].Service.Port), nil
+	return fmt.Sprintf("%s:%d", info[0].Service.Address, info[0].Service.Port), nil
 }
 
 func Dial(ServerHost, ServerPort, ServerName string) (*grpc.ClientConn, error) {
