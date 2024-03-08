@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"gopkg.in/yaml.v2"
 )
 
