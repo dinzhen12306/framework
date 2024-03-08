@@ -45,7 +45,21 @@ func ServiceRegister(serverName, address string, port int) error {
 }
 
 func AgentHealthServiceByName(name string) (string, error) {
-	client, err := api.NewClient(api.DefaultConfig())
+	config, err := nacos.GetConfig()
+	if err != nil {
+		return "", err
+	}
+	data := struct {
+		Consul struct {
+			Host string `yaml:"Host"`
+			Port int    `yaml:"Port"`
+		} `yaml:"Consul"`
+	}{}
+	err = yaml.Unmarshal([]byte(config), &data)
+	if err != nil {
+		return "", err
+	}
+	client, err := api.NewClient(&api.Config{Address: fmt.Sprintf("%s:%d", data.Consul.Host, data.Consul.Port)})
 	if err != nil {
 		return "", err
 	}
