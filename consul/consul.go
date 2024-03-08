@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"gopkg.in/yaml.v2"
 )
 
@@ -74,11 +73,11 @@ func AgentHealthServiceByName(name string) (string, error) {
 }
 
 func Dial(ServerHost, ServerPort, ServerName string) (*grpc.ClientConn, error) {
-	return grpc.Dial(
-		// consul服务
-		fmt.Sprintf("%s:%s", ServerHost, ServerPort),
-		// 指定round_robin策略
-		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingPolicy": "round_robin", "service": {"name": "%s"}}`, ServerName)),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
+    return grpc.Dial(
+        // consul服务
+        fmt.Sprintf("%s:%s", ServerHost, ServerPort),
+        // 指定round_robin策略
+        grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"loadBalancingPolicy": "round_robin", "service": {"name": "%s"}}`, ServerName)),
+        grpc.WithInsecure(),
+    )
 }
