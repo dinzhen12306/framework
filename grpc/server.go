@@ -16,7 +16,7 @@ func NewGrpcRegister(serverName, host string, port int, register func(grpcServer
 	if err != nil {
 		return err
 	}
-	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	listen, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		return err
 	}
@@ -33,4 +33,21 @@ func NewGrpcRegister(serverName, host string, port int, register func(grpcServer
 	}
 	log.Println("The server port is located at ", listen.Addr())
 	return nil
+}
+
+func GetIp() (ip []string) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ip
+	}
+	for _, addr := range addrs {
+		ipNet, isVailIpNet := addr.(*net.IPNet)
+		if isVailIpNet && !ipNet.IP.IsLoopback() {
+			if ipNet.IP.To4() != nil {
+				ip = append(ip, ipNet.IP.String())
+			}
+		}
+
+	}
+	return ip
 }

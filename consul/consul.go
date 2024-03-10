@@ -12,7 +12,7 @@ import (
 	"log"
 )
 
-func ServiceRegister(serverName, address string, port int) error {
+func ServiceRegister(serviceName, serviceHost string, servicePort int) error {
 	config, err := nacos.GetConfig()
 	if err != nil {
 		return err
@@ -27,18 +27,20 @@ func ServiceRegister(serverName, address string, port int) error {
 	if err != nil {
 		return err
 	}
-	client, err := api.NewClient(&api.Config{Address: fmt.Sprintf("%s:%d", data.Consul.Host, data.Consul.Port)})
+	a := api.DefaultConfig()
+	a.Address = fmt.Sprintf("%s:%d", data.Consul.Host, data.Consul.Port)
+	client, err := api.NewClient(a)
 	if err != nil {
 		return err
 	}
 	return client.Agent().ServiceRegister(&api.AgentServiceRegistration{
 		ID:      uuid.NewString(),
-		Name:    serverName,
+		Name:    serviceName,
 		Tags:    []string{"GRPC"},
-		Port:    port,
-		Address: address,
+		Port:    servicePort,
+		Address: serviceHost,
 		Check: &api.AgentServiceCheck{
-			GRPC:                           fmt.Sprintf("%s:%d", address, port),
+			GRPC:                           fmt.Sprintf("%s:%d", serviceHost, servicePort),
 			Interval:                       "5s",
 			DeregisterCriticalServiceAfter: "10s",
 		},
